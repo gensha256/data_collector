@@ -1,0 +1,5 @@
+redis_host: redis_host:2367
+redis_password: password
+redis_username: user
+cmc_api_token: token
+cmc_api_limit: 1
