@@ -9,7 +9,7 @@ import (
 	"github.com/gensha256/data_collector/cmc"
 	"github.com/gensha256/data_collector/store"
 
-	"gopkg.in/robfig/cron.v2"
+	"github.com/robfig/cron/v3"
 )
 
 func main() {
@@ -18,12 +18,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//TODO: Remove this handler, then add cron job to fetch cmc crypto once per hour
-
 	cmcAPI := cmc.NewAPI()
-	cronShedule := cron.New()
+	crn := cron.New()
 
-	_, err = cronShedule.AddFunc("0 0 * * * *", func() {
+	_, err = crn.AddFunc("@hourly", func() {
 
 		cmcData := cmcAPI.GetCryptoLatest()
 
@@ -40,7 +38,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cronShedule.Start()
+	crn.Start()
 
 	http.HandleFunc("/symbols", func(writer http.ResponseWriter, req *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
