@@ -8,6 +8,8 @@ import (
 
 	"github.com/gensha256/data_collector/cmc"
 	"github.com/gensha256/data_collector/store"
+
+	"gopkg.in/robfig/cron.v2"
 )
 
 func main() {
@@ -16,12 +18,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	cmcAPI := cmc.NewAPI()
-
 	//TODO: Remove this handler, then add cron job to fetch cmc crypto once per hour
-	http.HandleFunc("/cmc", func(writer http.ResponseWriter, req *http.Request) {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusOK)
+
+	cmcAPI := cmc.NewAPI()
+	cronShedule := cron.New()
+
+	_, err = cronShedule.AddFunc("0 0 * * * *", func() {
 
 		cmcData := cmcAPI.GetCryptoLatest()
 
@@ -29,19 +31,16 @@ func main() {
 
 			err := rds.StoreCmcEntity(value)
 			if err != nil {
-				writer.WriteHeader(http.StatusInternalServerError)
-				return
+				log.Fatal(err)
 			}
 		}
-
-		byteArr, err := json.Marshal(cmcData)
-		if err != nil {
-			writer.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		_, _ = writer.Write(byteArr)
+		log.Println("cmc cache :", len(cmcData))
 	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	cronShedule.Start()
 
 	http.HandleFunc("/symbols", func(writer http.ResponseWriter, req *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
@@ -67,10 +66,11 @@ func main() {
 		writer.WriteHeader(http.StatusOK)
 
 		requestPath := req.URL.Path
-		splitPath := strings.Split(requestPath, "/cmc/")
+		splitPath := strings.Split(requestPath, "/")
+		lastPath := splitPath[len(splitPath)-1]
 
 		//TODO: Validate path for create usage for insure split path 1
-		dataBySymbol, err := rds.GetCmcEntityTimeSeriesBySymbol(splitPath[1])
+		dataBySymbol, err := rds.GetCmcEntityTimeSeriesBySymbol(lastPath)
 		if err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
