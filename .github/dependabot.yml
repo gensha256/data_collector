@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "dependabot"
+    open-pull-requests-limit: 20
+    pull-request-branch-name:
+      separator: "-"
+    allow:
+      - dependency-type: "all"
+    commit-message:
+      prefix: "dep: "
+    reviewers:
+      - "gensha256"
