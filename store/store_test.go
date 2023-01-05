@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -51,13 +52,11 @@ func TestCmcEntityEvalTTS(t *testing.T) {
 func TestStoreAndGetCmcEntity(t *testing.T) {
 	rs, _ := NewRedisStore()
 
-	err := rs.StoreCmcEntity(entity)
-	if err != nil {
-		t.Error(err)
-		t.Fail()
-	}
+	ctx := context.Background()
 
-	bySymbol, err := rs.GetCmcEntityTimeSeriesBySymbol(entity.Symbol)
+	err := rs.StoreCmcEntity(ctx, entity)
+
+	bySymbol, err := rs.GetCmcEntityTimeSeriesBySymbol(ctx, entity.Symbol)
 	if err != nil {
 		t.Error(err)
 		t.Fail()
@@ -68,7 +67,7 @@ func TestStoreAndGetCmcEntity(t *testing.T) {
 		t.Fail()
 	}
 
-	symbols, err := rs.GetSymbols()
+	symbols, err := rs.GetSymbols(ctx)
 	if err != nil {
 		t.Error(err)
 		t.Fail()
