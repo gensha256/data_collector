@@ -41,16 +41,17 @@ func NewRedisStore() (*RedisStore, error) {
 	return &RedisStore{rds: rds}, nil
 }
 
-func (rs *RedisStore) StoreCmcEntity(entity common.CmcEntity) error {
+func (rs *RedisStore) StoreCmcEntity(ctx context.Context, entity common.CmcEntity) error {
 	key := entity.GetRedisKey()
 	val := entity.GetAsJSON()
 
-	err := rs.rds.Set(context.Background(), key, val, expired).Err()
+	err := rs.rds.Set(ctx, key, val, expired).Err()
 	if err != nil {
+
 		return err
 	}
 
-	err = rs.rds.ZAdd(context.Background(), cmcSet, &redis.Z{
+	err = rs.rds.ZAdd(ctx, cmcSet, &redis.Z{
 		Score:  float64(entity.CmcRank),
 		Member: entity.Symbol,
 	}).Err()
@@ -62,7 +63,7 @@ func (rs *RedisStore) StoreCmcEntity(entity common.CmcEntity) error {
 	return nil
 }
 
-func (rs *RedisStore) GetCmcEntityTimeSeriesBySymbol(symbol string) ([]common.CmcEntity, error) {
+func (rs *RedisStore) GetCmcEntityTimeSeriesBySymbol(ctx context.Context, symbol string) ([]common.CmcEntity, error) {
 	keyPattern := fmt.Sprintf(common.CmcEntityBySymbolPattern, strings.ToLower(symbol))
 
 	keysMatched := make([]string, 0)
@@ -72,7 +73,7 @@ func (rs *RedisStore) GetCmcEntityTimeSeriesBySymbol(symbol string) ([]common.Cm
 
 	for {
 
-		keys, cursor, err = rs.rds.Scan(context.Background(), cursor, keyPattern, 100).Result()
+		keys, cursor, err = rs.rds.Scan(ctx, cursor, keyPattern, 100).Result()
 		if err != nil {
 			return nil, err
 		}
@@ -86,7 +87,7 @@ func (rs *RedisStore) GetCmcEntityTimeSeriesBySymbol(symbol string) ([]common.Cm
 	result := make([]common.CmcEntity, 0)
 
 	for _, value := range keysMatched {
-		cmcAsJSON, err := rs.rds.Get(context.Background(), value).Result()
+		cmcAsJSON, err := rs.rds.Get(ctx, value).Result()
 		if err != nil {
 			return nil, err
 		}
@@ -100,8 +101,6 @@ func (rs *RedisStore) GetCmcEntityTimeSeriesBySymbol(symbol string) ([]common.Cm
 		result = append(result, entity)
 	}
 
-	//TODO: Develop standard sort algo
-
 	sort.Slice(result, func(i, j int) bool {
 		return result[i].LastUpdated.Before(result[j].LastUpdated)
 	})
@@ -109,11 +108,21 @@ func (rs *RedisStore) GetCmcEntityTimeSeriesBySymbol(symbol string) ([]common.Cm
 	return result, nil
 }
 
-func (rs *RedisStore) GetSymbols() ([]string, error) {
-	sortSymbols, err := rs.rds.ZRange(context.Background(), cmcSet, 0, -1).Result()
+func (rs *RedisStore) GetSymbols(ctx context.Context) ([]string, error) {
+	sortSymbols, err := rs.rds.ZRange(ctx, cmcSet, 0, -1).Result()
 	if err != nil {
 		return nil, err
 	}
 
-	return sortSymbols, nil
+	return sortSymbols, err
+}
+
+func (rs *RedisStore) JustStore(entity common.CmcEntity) error {
+	key := entity.GetRedisKey()
+	val := entity.GetAsJSON()
+	err := rs.rds.Set(context.Background(), key, val, expired).Err()
+	if err != nil {
+		return err
+	}
+	return nil
 }
