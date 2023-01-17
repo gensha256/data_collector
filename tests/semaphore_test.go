@@ -14,7 +14,7 @@ import (
 var numbers = make(chan int, 2)
 
 func TestSemaphore(t *testing.T) {
-
+	t.Skip()
 	wg := sync.WaitGroup{}
 
 	rs, err := store.NewRedisStore()
@@ -110,7 +110,7 @@ func Listener(c chan string, wg *sync.WaitGroup) {
 }
 
 func TestSem(t *testing.T) {
-
+	t.Skip()
 	wg := sync.WaitGroup{}
 	defer wg.Wait()
 

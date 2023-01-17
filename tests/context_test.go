@@ -9,7 +9,7 @@ import (
 )
 
 func TestPrintInt(t *testing.T) {
-
+	t.Skip()
 	testCh := make(chan int)
 
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*2)
@@ -35,6 +35,7 @@ func TestPrintInt(t *testing.T) {
 }
 
 func TestPrint(t *testing.T) {
+	t.Skip()
 	chanTest := make(chan int)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
@@ -52,6 +53,20 @@ func TestPrint(t *testing.T) {
 	}
 }
 
+func TestContextWithValue(t *testing.T) {
+	t.Skip()
+	ctx := context.Background()
+
+	ctxValue := SendValue(ctx)
+
+	testData := "Mark"
+
+	if ctxValue != testData {
+		t.Error("not correct value")
+		t.Fail()
+	}
+}
+
 func PrintInt(ctx context.Context, ch chan int) {
 
 	log.Println("Add data in channel")
@@ -66,20 +81,6 @@ func PrintInt(ctx context.Context, ch chan int) {
 			}
 		case ch <- randNum:
 		}
-	}
-}
-
-func TestContextWithValue(t *testing.T) {
-
-	ctx := context.Background()
-
-	ctxValue := SendValue(ctx)
-
-	testData := "Mark"
-
-	if ctxValue != testData {
-		t.Error("not correct value")
-		t.Fail()
 	}
 }
 

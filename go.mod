@@ -6,7 +6,6 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v5 v5.2.0
-	github.com/lib/pq v1.10.7
 	github.com/robfig/cron/v3 v3.0.1
 	gopkg.in/yaml.v3 v3.0.1
 )
