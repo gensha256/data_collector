@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gensha256/data_collector/common"
+	"github.com/gensha256/data_collector/pkg/common"
 )
 
 var entity = common.CmcEntity{
