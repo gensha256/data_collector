@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"github.com/gensha256/data_collector/pkg/cmc"
-	"github.com/gensha256/data_collector/pkg/store"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/gensha256/data_collector/cmc"
+	"github.com/gensha256/data_collector/store"
 
 	"github.com/robfig/cron/v3"
 )

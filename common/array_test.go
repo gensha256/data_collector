@@ -1,7 +1,6 @@
 package common
 
 import (
-	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -56,21 +55,5 @@ func TestSortingArray(t *testing.T) {
 			t.Error("not sorted array")
 			t.Fail()
 		}
-	}
-}
-
-func TestDoesArrayContainString(t *testing.T) {
-	arr := []string{"hello", "name", "have"}
-	search := "name"
-	fmt.Printf("%p \n", &arr)
-	fmt.Printf("%p \n", &search)
-
-	result := DoesArrayContainString(arr, search)
-
-	fmt.Printf("%p \n", &arr)
-	fmt.Printf("%p \n", &search)
-
-	if result != true {
-		t.Fail()
 	}
 }

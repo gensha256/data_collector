@@ -14,11 +14,6 @@ type Conf struct {
 	RedisUsername string `yaml:"redis_username"`
 	CmcApiToken   string `yaml:"cmc_api_token"`
 	CmcApiLimit   int    `yaml:"cmc_api_limit"`
-	PgxHost       string `yaml:"pgx_host"`
-	PgxPort       string `yaml:"pgx_port"`
-	PgxUser       string `yaml:"pgx_user"`
-	PgxPassword   string `yaml:"pgx_password"`
-	PgxDbName     string `yaml:"pgx_db_name"`
 }
 
 func NewConfig() *Conf {

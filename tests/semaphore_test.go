@@ -1,13 +1,14 @@
 package tests
 
 import (
-	"github.com/gensha256/data_collector/pkg/common"
-	"github.com/gensha256/data_collector/pkg/store"
 	"log"
 	"math/rand"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/gensha256/data_collector/common"
+	"github.com/gensha256/data_collector/store"
 )
 
 var numbers = make(chan int, 2)
