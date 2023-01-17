@@ -13,10 +13,7 @@ import (
 
 func main() {
 
-	db, err := store.NewPgxConnect()
-	if err != nil {
-		log.Fatal(err)
-	}
+	userDB := store.NewUserStore()
 
 	http.HandleFunc("/users", func(writer http.ResponseWriter, req *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
@@ -26,20 +23,22 @@ func main() {
 			return
 		}
 
-		resUsers, err := db.GetAllUsers()
+		usersList, err := userDB.GetAll()
 		if err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		byteArr, err := json.Marshal(resUsers)
+
+		byteArr, err := json.Marshal(usersList)
 		if err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
 		_, _ = writer.Write(byteArr)
 	})
 
-	http.HandleFunc("/insert", func(writer http.ResponseWriter, req *http.Request) {
+	http.HandleFunc("/users/create", func(writer http.ResponseWriter, req *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
 
 		if req.Method != http.MethodPost {
@@ -60,14 +59,19 @@ func main() {
 			return
 		}
 
-		err = db.CreateUser(user)
+		result, err := userDB.Create(user)
 		if err != nil {
 			writer.WriteHeader(http.StatusBadRequest)
+			return
 		}
+
+		byteArr, _ = json.Marshal(result)
+
 		writer.WriteHeader(http.StatusOK)
+		_, _ = writer.Write(byteArr)
 	})
 
-	http.HandleFunc("/update", func(writer http.ResponseWriter, req *http.Request) {
+	http.HandleFunc("/users/update", func(writer http.ResponseWriter, req *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
 
 		if req.Method != http.MethodPut {
@@ -75,26 +79,33 @@ func main() {
 			return
 		}
 
-		us := models.User{}
+		user := models.User{}
 
 		byteArr, err := io.ReadAll(req.Body)
-		if err != nil {
-			log.Fatal()
-		}
-
-		err = json.Unmarshal(byteArr, &us)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
 		}
-		err = db.UpdateUser(us)
+
+		err = json.Unmarshal(byteArr, &user)
+		if err != nil {
+			http.Error(writer, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		user, err = userDB.Update(user)
 		if err != nil {
 			writer.WriteHeader(http.StatusBadRequest)
+			return
 		}
+
+		byteArr, _ = json.Marshal(user)
+
 		writer.WriteHeader(http.StatusOK)
+		_, _ = writer.Write(byteArr)
 	})
 
-	http.HandleFunc("/delete/", func(writer http.ResponseWriter, req *http.Request) {
+	http.HandleFunc("/users/delete/", func(writer http.ResponseWriter, req *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
 
 		if req.Method != http.MethodDelete {
@@ -104,15 +115,19 @@ func main() {
 
 		requestPath := req.URL.Path
 		splitPath := strings.Split(requestPath, "/")
-		id := splitPath[len(splitPath)-1]
+		id := splitPath[len(splitPath)-2]
 
-		err := db.DeleteUser(id)
+		err := userDB.Delete(id)
 		if err != nil {
-			writer.WriteHeader(http.StatusBadRequest)
+			http.Error(writer, err.Error(), http.StatusMethodNotAllowed)
+			return
 		}
+
 		writer.WriteHeader(http.StatusOK)
 	})
 
-	log.Println("Listening on a 8080 port...")
-	http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
