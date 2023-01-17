@@ -8,11 +8,22 @@ import (
 
 func TestUserStore(t *testing.T) {
 
+	// Test data
+
+	testEmail := "test@gmail.com"
+	testEmail2 := "test2@gmail.com"
+	testTelegram := "@test"
+	testTelegram2 := "@test2"
+
 	db := NewUserStore()
 
+	// Make sure test data cleaned up
+	_ = db.DeleteByEmail(testEmail)
+	_ = db.DeleteByEmail(testEmail2)
+
 	usr := models.User{
-		Email:    "test@gmail.com",
-		Telegram: "@test",
+		Email:    testEmail,
+		Telegram: testTelegram,
 	}
 
 	resultCreate, err := db.Create(usr)
@@ -21,7 +32,7 @@ func TestUserStore(t *testing.T) {
 		t.Fail()
 	}
 
-	if resultCreate.Id == "" {
+	if resultCreate.ID == "" {
 		t.Error("not correct id")
 		t.Fail()
 	}
@@ -36,13 +47,13 @@ func TestUserStore(t *testing.T) {
 		t.Fail()
 	}
 
-	userByID, err := db.GetById(resultCreate.Id)
+	userByID, err := db.GetById(resultCreate.ID)
 	if err != nil {
 		t.Error(err)
 		t.Fail()
 	}
 
-	if userByID.Id != resultCreate.Id {
+	if userByID.ID != resultCreate.ID {
 		t.Error("not correct id")
 		t.Fail()
 	}
@@ -57,8 +68,8 @@ func TestUserStore(t *testing.T) {
 		t.Fail()
 	}
 
-	userByID.Email = "test2@gmail.com"
-	userByID.Telegram = "@test2"
+	userByID.Email = testEmail2
+	userByID.Telegram = testTelegram2
 
 	updateUser, err := db.Update(userByID)
 	if err != nil {
@@ -66,7 +77,7 @@ func TestUserStore(t *testing.T) {
 		t.Fail()
 	}
 
-	if userByID.Id != updateUser.Id {
+	if userByID.ID != updateUser.ID {
 		t.Error("not correct id")
 		t.Fail()
 	}
@@ -81,7 +92,7 @@ func TestUserStore(t *testing.T) {
 		t.Fail()
 	}
 
-	err = db.Delete(userByID.Id)
+	err = db.Delete(userByID.ID)
 	if err != nil {
 		t.Error(err)
 		t.Fail()

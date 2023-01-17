@@ -1,7 +1,11 @@
 package models
 
+import "time"
+
 type User struct {
-	Id       string
-	Email    string
-	Telegram string
+	ID        string
+	Email     string
+	Telegram  string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
