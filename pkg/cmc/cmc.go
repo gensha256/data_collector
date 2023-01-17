@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gensha256/data_collector/common"
+	common2 "github.com/gensha256/data_collector/pkg/common"
 )
 
 const (
@@ -16,16 +16,16 @@ const (
 )
 
 type API struct {
-	conf *common.Conf
+	conf *common2.Conf
 }
 
 func NewAPI() *API {
-	conf := common.NewConfig()
+	conf := common2.NewConfig()
 
 	return &API{conf: conf}
 }
 
-func (c *API) GetCryptoLatest() []common.CmcEntity {
+func (c *API) GetCryptoLatest() []common2.CmcEntity {
 
 	client := http.Client{}
 	url := fmt.Sprintf(ApiUrl, c.conf.CmcApiLimit)
@@ -54,10 +54,10 @@ func (c *API) GetCryptoLatest() []common.CmcEntity {
 		log.Fatal(err)
 	}
 
-	result := make([]common.CmcEntity, 0)
+	result := make([]common2.CmcEntity, 0)
 
 	for _, val := range cmcResult.Data {
-		entity := common.CmcEntity{
+		entity := common2.CmcEntity{
 			Id:               val.Id,
 			Name:             val.Name,
 			Symbol:           val.Symbol,
