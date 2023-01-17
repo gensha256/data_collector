@@ -9,6 +9,7 @@ import (
 	"time"
 
 	common2 "github.com/gensha256/data_collector/pkg/common"
+	"github.com/gensha256/data_collector/pkg/models"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -41,7 +42,7 @@ func NewRedisStore() (*RedisStore, error) {
 	return &RedisStore{rds: rds}, nil
 }
 
-func (rs *RedisStore) StoreCmcEntity(ctx context.Context, entity common2.CmcEntity) error {
+func (rs *RedisStore) StoreCmcEntity(ctx context.Context, entity models.CmcEntity) error {
 	key := entity.GetRedisKey()
 	val := entity.GetAsJSON()
 
@@ -63,8 +64,8 @@ func (rs *RedisStore) StoreCmcEntity(ctx context.Context, entity common2.CmcEnti
 	return nil
 }
 
-func (rs *RedisStore) GetCmcEntityTimeSeriesBySymbol(ctx context.Context, symbol string) ([]common2.CmcEntity, error) {
-	keyPattern := fmt.Sprintf(common2.CmcEntityBySymbolPattern, strings.ToLower(symbol))
+func (rs *RedisStore) GetCmcEntityTimeSeriesBySymbol(ctx context.Context, symbol string) ([]models.CmcEntity, error) {
+	keyPattern := fmt.Sprintf(models.CmcEntityBySymbolPattern, strings.ToLower(symbol))
 
 	keysMatched := make([]string, 0)
 	var cursor uint64
@@ -84,7 +85,7 @@ func (rs *RedisStore) GetCmcEntityTimeSeriesBySymbol(ctx context.Context, symbol
 		}
 	}
 
-	result := make([]common2.CmcEntity, 0)
+	result := make([]models.CmcEntity, 0)
 
 	for _, value := range keysMatched {
 		cmcAsJSON, err := rs.rds.Get(ctx, value).Result()
@@ -92,7 +93,7 @@ func (rs *RedisStore) GetCmcEntityTimeSeriesBySymbol(ctx context.Context, symbol
 			return nil, err
 		}
 
-		var entity common2.CmcEntity
+		var entity models.CmcEntity
 		err = json.Unmarshal([]byte(cmcAsJSON), &entity)
 		if err != nil {
 			return nil, err
@@ -117,7 +118,7 @@ func (rs *RedisStore) GetSymbols(ctx context.Context) ([]string, error) {
 	return sortSymbols, err
 }
 
-func (rs *RedisStore) JustStore(entity common2.CmcEntity) error {
+func (rs *RedisStore) JustStore(entity models.CmcEntity) error {
 	key := entity.GetRedisKey()
 	val := entity.GetAsJSON()
 	err := rs.rds.Set(context.Background(), key, val, expired).Err()

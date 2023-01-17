@@ -7,7 +7,8 @@ import (
 	"log"
 	"net/http"
 
-	common2 "github.com/gensha256/data_collector/pkg/common"
+	"github.com/gensha256/data_collector/pkg/common"
+	common2 "github.com/gensha256/data_collector/pkg/models"
 )
 
 const (
@@ -16,11 +17,11 @@ const (
 )
 
 type API struct {
-	conf *common2.Conf
+	conf *common.Conf
 }
 
 func NewAPI() *API {
-	conf := common2.NewConfig()
+	conf := common.NewConfig()
 
 	return &API{conf: conf}
 }
@@ -48,7 +49,7 @@ func (c *API) GetCryptoLatest() []common2.CmcEntity {
 		log.Fatal(err)
 	}
 
-	var cmcResult LatestResponse
+	var cmcResult common2.LatestResponse
 	err = json.Unmarshal(body, &cmcResult)
 	if err != nil {
 		log.Fatal(err)

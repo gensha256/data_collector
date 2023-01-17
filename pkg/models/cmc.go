@@ -1,4 +1,4 @@
-package common
+package models
 
 import (
 	"encoding/json"
@@ -6,11 +6,6 @@ import (
 	"log"
 	"strings"
 	"time"
-)
-
-const (
-	CmcEntityRedisPrefix     = "cmc"
-	CmcEntityBySymbolPattern = "cmc.%s.*"
 )
 
 type CmcEntity struct {
@@ -27,6 +22,11 @@ type CmcEntity struct {
 	MarketCap        float64   `json:"market_cap"`
 	LastUpdated      time.Time `json:"last_updated"`
 }
+
+const (
+	CmcEntityRedisPrefix     = "cmc"
+	CmcEntityBySymbolPattern = "cmc.%s.*"
+)
 
 func (entity *CmcEntity) EvalTTS() int64 {
 	date := entity.LastUpdated

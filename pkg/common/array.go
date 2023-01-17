@@ -1,5 +1,7 @@
 package common
 
+import "github.com/gensha256/data_collector/pkg/models"
+
 func DoesArrayContainString(arr []string, str string) bool {
 
 	for i := 0; i < len(arr); i++ {
@@ -11,7 +13,7 @@ func DoesArrayContainString(arr []string, str string) bool {
 	return false
 }
 
-func SortArray(arr []CmcEntity) []CmcEntity {
+func SortArray(arr []models.CmcEntity) []models.CmcEntity {
 
 	if len(arr) == 1 {
 		return arr

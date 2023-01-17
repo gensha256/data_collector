@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gensha256/data_collector/pkg/common"
+	"github.com/gensha256/data_collector/pkg/models"
 )
 
-var entity = common.CmcEntity{
+var entity = models.CmcEntity{
 	Id:               -1,
 	Name:             "Test",
 	Symbol:           "TEST",
@@ -22,6 +22,7 @@ var entity = common.CmcEntity{
 	MarketCap:        -1,
 	LastUpdated:      time.Date(2022, 12, 26, 13, 54, 00, 00, time.UTC),
 }
+
 var entityKey = "cmc.test.1672059600"
 var entityTTS = int64(1672059600)
 

@@ -5,9 +5,11 @@ import (
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/gensha256/data_collector/pkg/models"
 )
 
-var testCmcEntity = CmcEntity{
+var testCmcEntity = models.CmcEntity{
 	Id:               1,
 	Name:             "Stellar Lumen",
 	Symbol:           "XLM",
@@ -21,9 +23,9 @@ var testCmcEntity = CmcEntity{
 	MarketCap:        -1,
 }
 
-func GenerateEntityArray(size int) []CmcEntity {
+func GenerateEntityArray(size int) []models.CmcEntity {
 
-	result := make([]CmcEntity, 0, size)
+	result := make([]models.CmcEntity, 0, size)
 
 	for i := 0; i < size; i++ {
 

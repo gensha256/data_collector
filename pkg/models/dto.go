@@ -1,4 +1,4 @@
-package cmc
+package models
 
 import "time"
 

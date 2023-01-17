@@ -2,25 +2,21 @@ package store
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"log"
 	"strconv"
 
 	"github.com/gensha256/data_collector/pkg/common"
+	"github.com/gensha256/data_collector/pkg/models"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
-type users struct {
-	Id       string
-	Name     string
-	SurName  string
-	Gender   string
-	Email    string
-	Telegram string
+type PgxStore struct {
+	pgx *pgx.Conn
 }
 
-func NewPgxConnect() *pgx.Conn {
+func NewPgxConnect() (*PgxStore, error) {
 	conf := common.NewConfig()
 
 	portInt, _ := strconv.Atoi(conf.PgxPort)
@@ -38,21 +34,20 @@ func NewPgxConnect() *pgx.Conn {
 		log.Println("DB connection error", err)
 	}
 
-	return conn
+	return &PgxStore{pgx: conn}, nil
 }
 
-func CreateTableUsers(pg *pgx.Conn) error {
+func (pg *PgxStore) CreateTableUsers() error {
 	sqlCreateTable := `CREATE TABLE IF NOT EXISTS users
 	(
 		id VARCHAR(250) NOT NULL PRIMARY KEY,
-		name VARCHAR(50) NOT NULL,
-		surname VARCHAR(50) NOT NULL,
-		gender VARCHAR(7) NOT NULL,
 		email VARCHAR(150),
-    	telegram VARCHAR(50) 
+    	telegram VARCHAR(50),
+   		
+    	UNIQUE (email, telegram)
     );`
 
-	rows, err := pg.Exec(context.Background(), sqlCreateTable)
+	rows, err := pg.pgx.Exec(context.Background(), sqlCreateTable)
 	if err != nil {
 		return err
 	}
@@ -61,11 +56,25 @@ func CreateTableUsers(pg *pgx.Conn) error {
 	return nil
 }
 
-func InsertValue(pg *pgx.Conn, nm string, sur string, gen string, email string, tg string) error {
+func (pg *PgxStore) CreateUser(us models.User) error {
 	id := uuid.New()
 	strId := id.String()
 
-	res, err := pg.Exec(context.Background(), `INSERT INTO users (id, name, surname, gender, email, telegram) VALUES ($1, $2, $3, $4, $5, $6)`, strId, nm, sur, gen, email, tg)
+	res, err := pg.pgx.Exec(context.Background(),
+		`INSERT INTO users (id,email,telegram) VALUES ($1, $2, $3)`,
+		strId, us.Email, us.Telegram)
+
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	log.Println(res)
+
+	return nil
+}
+
+func (pg *PgxStore) DeleteUser(id string) error {
+	res, err := pg.pgx.Exec(context.Background(), `DELETE FROM users WHERE id=$1`, id)
 	if err != nil {
 		return err
 	}
@@ -74,8 +83,8 @@ func InsertValue(pg *pgx.Conn, nm string, sur string, gen string, email string, 
 	return nil
 }
 
-func DeleteValue(pg *pgx.Conn, id string) error {
-	res, err := pg.Exec(context.Background(), `DELETE FROM users WHERE  id = $1`, id)
+func (pg *PgxStore) UpdateUser(us models.User) error {
+	res, err := pg.pgx.Exec(context.Background(), `UPDATE users SET email=$1 WHERE id=$2`, us.Email, us.Id)
 	if err != nil {
 		return err
 	}
@@ -84,28 +93,18 @@ func DeleteValue(pg *pgx.Conn, id string) error {
 	return nil
 }
 
-func UpdateValue(pg *pgx.Conn, name string, id string) error {
-	res, err := pg.Exec(context.Background(), `UPDATE users SET name=$1 WHERE id=$2`, name, id)
-	if err != nil {
-		return err
-	}
-	log.Println(res)
-
-	return nil
-}
-
-func GetAllValue(pg *pgx.Conn) ([]users, error) {
-	rows, err := pg.Query(context.Background(), `SELECT * FROM users`)
+func (pg *PgxStore) GetAllUsers() ([]models.User, error) {
+	rows, err := pg.pgx.Query(context.Background(), `SELECT * FROM users`)
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
 	}
 
-	usr := users{}
-	var res []users
+	usr := models.User{}
+	var res []models.User
 
 	for rows.Next() {
-		err := rows.Scan(&usr.Id, &usr.Name, &usr.SurName, &usr.Gender, &usr.Email, &usr.Telegram)
+		err := rows.Scan(&usr.Id, &usr.Email, &usr.Telegram)
 		if err != nil {
 			log.Fatal(err)
 			return nil, err
@@ -114,4 +113,21 @@ func GetAllValue(pg *pgx.Conn) ([]users, error) {
 	}
 
 	return res, nil
+}
+
+func (pg *PgxStore) GetUserId(us models.User) (string, error) {
+	rows, err := pg.pgx.Query(context.Background(), `SELECT id FROM users WHERE email=$1`, us.Email)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var id string
+	for rows.Next() {
+		err := rows.Scan(&id)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return id, nil
 }

@@ -1,13 +1,14 @@
 package tests
 
 import (
-	"github.com/gensha256/data_collector/pkg/common"
-	"github.com/gensha256/data_collector/pkg/store"
 	"log"
 	"math/rand"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/gensha256/data_collector/pkg/models"
+	"github.com/gensha256/data_collector/pkg/store"
 )
 
 var numbers = make(chan int, 2)
@@ -45,7 +46,7 @@ func TestSemaphore(t *testing.T) {
 
 func Writer(c chan string, rs *store.RedisStore, wg *sync.WaitGroup) {
 
-	ent := common.CmcEntity{
+	ent := models.CmcEntity{
 		Id:               -1,
 		Name:             "Stellar Lumen",
 		Symbol:           "XLM",
